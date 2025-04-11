@@ -1,6 +1,5 @@
 #include <string.h>
 #include <windows.h>
-#include <dbghelp.h>
 
 DWORD WINAPI ModsInit(LPVOID lpParameter) {
 	WIN32_FIND_DATA fileData;
@@ -34,22 +33,11 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID reserved) {
 	}
 	return TRUE;
 }
-// i know about the horrors below, they might not even work but that wont affect the mod.
-// you might just never get a crash dump ever :D
-WINBOOL WINAPI HookedMiniDumpWriteDump(
-	HANDLE hProcess, DWORD ProcessId, HANDLE hFile, MINIDUMP_TYPE DumpType, 
-	CONST PMINIDUMP_EXCEPTION_INFORMATION Exception, 
-	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStream, 
-	CONST PMINIDUMP_CALLBACK_INFORMATION Callback) 
-{
-	return MiniDumpWriteDump(hProcess,ProcessId,hFile,DumpType,Exception,UserStream,Callback);
-}
 
+// you might just never get a crash dump ever :D
 WINBOOL WINAPI MiniDumpWriteDump(
-	HANDLE hProcess, DWORD ProcessId, HANDLE hFile, MINIDUMP_TYPE DumpType, 
-	CONST PMINIDUMP_EXCEPTION_INFORMATION Exception, 
-	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStream, 
-	CONST PMINIDUMP_CALLBACK_INFORMATION Callback) 
+	HANDLE hProcess, DWORD ProcessId, HANDLE hFile, int DumpType, 
+	const void *Exception, const void *UserStream, const void *Callback)
 {
-	return HookedMiniDumpWriteDump(hProcess,ProcessId,hFile,DumpType,Exception,UserStream,Callback);
+	return TRUE;
 }
