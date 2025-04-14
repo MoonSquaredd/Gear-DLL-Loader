@@ -1,6 +1,12 @@
 #include <string.h>
 #include <windows.h>
 
+typedef void(*VoidFunc)(void);
+
+VoidFunc HitStopTimeExeRoot;
+int GLFunctionsCnt = 0;
+VoidFunc GameLoopFunctions[256] = {0};
+
 DWORD WINAPI ModsInit(LPVOID lpParameter) {
 	WIN32_FIND_DATA fileData;
 	HANDLE hFile = FindFirstFileA("Mods\\*",&fileData);
@@ -26,12 +32,43 @@ DWORD WINAPI ModsInit(LPVOID lpParameter) {
 	return 0;
 }
 
+void GameLoopExecute(void) {
+	HitStopTimeExeRoot();
+	for (int i = 0; i < GLFunctionsCnt; i++) {
+		VoidFunc func = GameLoopFunctions[i];
+		if (func != NULL) {
+			func();
+		}
+	}
+	return;
+}
+
+void HookGameLoop(void) {
+	BYTE *base = (BYTE*)GetModuleHandle(NULL);
+	DWORD oldProtect;
+	HitStopTimeExeRoot = (VoidFunc)base+0x2af6a0;
+	char call[5] = {0xE8};
+	*(DWORD*)(call+1) = (DWORD)GameLoopExecute - ((DWORD)base+0x1c2fe7 + 5);
+	
+	VirtualProtect(base+0x1c2fe7,5,PAGE_EXECUTE_READWRITE,&oldProtect);
+	memcpy(base+0x1c2fe7,call,5);
+	VirtualProtect(base+0x1c2fe7,5,oldProtect,&oldProtect);
+	return;
+}
+
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID reserved) {
 	if (reason == DLL_PROCESS_ATTACH) {
 		HANDLE initThread = CreateThread(NULL,0,ModsInit,NULL,0,NULL);
 		CloseHandle(initThread);
+		HookGameLoop();
 	}
 	return TRUE;
+}
+
+void AssignToGameLoop(VoidFunc func) {
+	GameLoopFunctions[GLFunctionsCnt] = func;
+	GLFunctionsCnt += 1;
+	return;
 }
 
 // you might just never get a crash dump ever :D
