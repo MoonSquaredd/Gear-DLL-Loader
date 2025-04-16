@@ -2,10 +2,14 @@
 #include <windows.h>
 
 typedef void(*VoidFunc)(void);
+typedef WINBOOL(WINAPI *MiniDumpWriteDump_t)(HANDLE,DWORD,HANDLE,int,const void *,const void *,const void *);
 
 VoidFunc HitStopTimeExeRoot;
 int GLFunctionsCnt = 0;
 VoidFunc GameLoopFunctions[256] = {0};
+
+HMODULE dbghelp;
+MiniDumpWriteDump_t OriginalFunc = NULL; 
 
 DWORD WINAPI ModsInit(LPVOID lpParameter) {
 	WIN32_FIND_DATA fileData;
@@ -58,6 +62,14 @@ void HookGameLoop(void) {
 
 BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID reserved) {
 	if (reason == DLL_PROCESS_ATTACH) {
+		char DBGOriginal[MAX_PATH];
+		GetSystemDirectoryA(DBGOriginal,MAX_PATH);
+		strcat(DBGOriginal,"\\dbghelp.dll");
+		dbghelp = LoadLibraryA(DBGOriginal);
+		if (dbghelp) {
+			OriginalFunc = (MiniDumpWriteDump_t)GetProcAddress(dbghelp,"MiniDumpWriteDump");
+		}
+		
 		HANDLE initThread = CreateThread(NULL,0,ModsInit,NULL,0,NULL);
 		CloseHandle(initThread);
 		HookGameLoop();
@@ -71,10 +83,12 @@ void AssignToGameLoop(VoidFunc func) {
 	return;
 }
 
-// you might just never get a crash dump ever :D
 WINBOOL WINAPI MiniDumpWriteDump(
 	HANDLE hProcess, DWORD ProcessId, HANDLE hFile, int DumpType, 
 	const void *Exception, const void *UserStream, const void *Callback)
 {
-	return TRUE;
+	if (OriginalFunc) {
+		return OriginalFunc(hProcess,ProcessId,hFile,DumpType,Exception,UserStream,Callback);
+	}
+	return FALSE;
 }
