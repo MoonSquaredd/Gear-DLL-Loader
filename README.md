@@ -1,7 +1,7 @@
 # - DLL Loader for GGXXACPR (Steam) -
 by: lovenus
 
-Version: 1.2
+Version: 1.2.1
 
 A Loader used to load custom DLLs into the game.
 
