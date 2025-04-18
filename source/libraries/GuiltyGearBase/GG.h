@@ -7,6 +7,7 @@ typedef void(*VoidFunc)(void);
 typedef void(*original)(VoidFunc);
 
 BOOL IsAddressReadable(LPCVOID);
+void ApplyIPS(const char*);
 
 static inline BYTE *GetBase() {
 	return (BYTE *)GetModuleHandle(NULL);
