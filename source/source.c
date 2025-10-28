@@ -1,5 +1,6 @@
 #include <string.h>
 #include <windows.h>
+#include "../api/Patch/patch.h"
 
 typedef void(*VoidFunc)(void);
 typedef WINBOOL(WINAPI *MiniDumpWriteDump_t)(HANDLE,DWORD,HANDLE,int,const void *,const void *,const void *);
@@ -48,15 +49,11 @@ void GameLoopExecute(void) {
 }
 
 void HookGameLoop(void) {
-	BYTE *base = (BYTE*)GetModuleHandle(NULL);
-	DWORD oldProtect;
+	BYTE *base = GetBase();
 	HitStopTimeExeRoot = (VoidFunc)base+0x2af6a0;
 	char call[5] = {0xE8};
 	*(DWORD*)(call+1) = (DWORD)GameLoopExecute - ((DWORD)base+0x1c2fe7 + 5);
-	
-	VirtualProtect(base+0x1c2fe7,5,PAGE_EXECUTE_READWRITE,&oldProtect);
-	memcpy(base+0x1c2fe7,call,5);
-	VirtualProtect(base+0x1c2fe7,5,oldProtect,&oldProtect);
+	PatchSafe(base+0x1c2fe7,call,5);
 	return;
 }
 
