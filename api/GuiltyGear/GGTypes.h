@@ -12,12 +12,12 @@ typedef enum {
 } CharacterID;
 
 typedef enum {
-	Grey = 0, London = 1, Colony = 2, Russia = 3,
-	China = 4, MayShip = 5, Zepp = 6, Nirvana = 7,
-	Paris = 8, Hell = 9, Grove = 10, Verdant = 11,
-	Castle = 12, Babylon = 13, PhantomCity = 14, Unknown = 15,
-	Frasco = 16, Ad2172 = 17, Grave = 18, Heaven = 19,
-	Korea = 20
+	BG_Grey = 0, BG_London = 1, BG_Colony = 2, BG_Russia = 3,
+	BG_China = 4, BG_MayShip = 5, BG_Zepp = 6, BG_Nirvana = 7,
+	BG_Paris = 8, BG_Hell = 9, BG_Grove = 10, BG_Verdant = 11,
+	BG_Castle = 12, BG_Babylon = 13, BG_PhantomCity = 14, BG_Unknown = 15,
+	BG_Frasco = 16, BG_Ad2172 = 17, BG_Grave = 18, BG_Heaven = 19,
+	BG_Korea = 20
 } StageID; //Add 20 for reload variants and 40 for slash variants
 
 typedef enum {
